@@ -1,83 +1,23 @@
+// Function parser data
+// const dataParser = properties.map((propertie, index) => {
+// const imageCode = propertie.code.substring(1);
+// const imageUrl = `./images/buildings/${imageCode}.png`;
+// const newType =
+// index >= 9 && index <= 98 ? "SR" : index > 98 ? "R" : propertie.type;
+// return { ...propertie, image: imageUrl, type: newType };
+// return {...propertie, type: `type--${propertie.type.toLowerCase()}`}
+// });
+
+const getPageSize = () => {
+  const screenWidth = $(window).width();
+  return screenWidth <= 576 ? 10 : 30;
+};
+
 window.addEventListener("load", function () {
   // Handle active category propertie
   const category = document.querySelector(".category-wrapper");
   const propertieContainer = document.querySelector(".category-container");
   const categoryBtns = category.querySelectorAll(".category-item");
-
-  const allProperties = `<div class="propertie-wrapper type--ssr">
-  ${Array.from(Array(9).keys())
-    .map(
-      (item) =>
-        `<div class="propertie-item">
-      <div class="propertie-item__card">
-        <div class="propertie-icon">
-          <img src="./images/type--ssr.png" />
-        </div>
-        <div class="propertie-image">
-          <img src="./images/propertie-thumnail.png" />
-        </div>
-      </div>
-      <div class="propertie-item__info">
-        <div class="info--name">Toà nhà Bitexco</div>
-        <div class="info--address">
-          2 Hải Triều, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh,
-          Việt Nam
-        </div>
-      </div>
-    </div>`
-    )
-    .join("")}
-</div>
-<div class="propertie-wrapper type--sr">
-  ${Array.from(Array(10).keys())
-    .map(
-      (item) =>
-        `<div class="propertie-item">
-      <div class="propertie-item__card">
-        <div class="propertie-icon">
-          <img src="./images/type--sr.png" />
-        </div>
-        <div class="propertie-image">
-          <img src="./images/propertie-thumnail.png" />
-        </div>
-      </div>
-      <div class="propertie-item__info">
-        <div class="info--name">Toà nhà Bitexco</div>
-        <div class="info--address">
-          2 Hải Triều, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh,
-          Việt Nam
-        </div>
-      </div>
-    </div>`
-    )
-    .join("")}
-</div>
-<div class="propertie-wrapper type--r">
-  ${Array.from(Array(10).keys())
-    .map(
-      (item) =>
-        `<div class="propertie-item">
-      <div class="propertie-item__card">
-        <div class="propertie-icon">
-          <img src="./images/type--r.png" />
-        </div>
-        <div class="propertie-image">
-          <img src="./images/propertie-thumnail.png" />
-        </div>
-      </div>
-      <div class="propertie-item__info">
-        <div class="info--name">Toà nhà Bitexco</div>
-        <div class="info--address">
-          2 Hải Triều, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh,
-          Việt Nam
-        </div>
-      </div>
-    </div>`
-    )
-    .join("")}
-</div>`;
-
-  propertieContainer.insertAdjacentHTML("beforeend", allProperties);
 
   categoryBtns.forEach((btn) => {
     btn.addEventListener("click", function () {
@@ -86,42 +26,147 @@ window.addEventListener("load", function () {
         .forEach((propertieWrapper) =>
           propertieWrapper?.parentNode?.removeChild(propertieWrapper)
         );
+
       const thisType = btn.dataset.propertie;
       categoryBtns.forEach((categoryBtn) =>
         categoryBtn.classList.remove("active")
       );
       btn.classList.add("active");
-
-      propertieContainer.insertAdjacentHTML(
-        "beforeend",
-        thisType === "type--all"
-          ? allProperties
-          : `<div class="propertie-wrapper ${thisType}">
-        ${Array.from(Array(12).keys())
-          .map(
-            (item) =>
-              `<div class="propertie-item">
-            <div class="propertie-item__card">
-              <div class="propertie-icon">
-                <img src="./images/${thisType}.png" />
+      if (thisType === "type--all") {
+        let container = $("#pagination");
+        container.pagination({
+          dataSource: function (done) {
+            $.ajax({
+              type: "GET",
+              url: "/propertiesData.json",
+              success: function (response) {
+                done(response);
+              },
+            });
+          },
+          showPrevious: false,
+          showNext: false,
+          pageSize: getPageSize(),
+          callback: function (data, pagination) {
+            const dataHtml = `<div class="propertie-wrapper">
+          ${data
+            .map(
+              (item) =>
+                `<div class='propertie-item ${item.type}'>
+              <div class="propertie-item__card">
+                <div class="propertie-icon">
+                  <img src="./images/${item.type}.png" />
+                </div>
+                <div class="propertie-image">
+                  <img src=${item.image} />
+                </div>
               </div>
-              <div class="propertie-image">
-                <img src="./images/propertie-thumnail.png" />
+              <div class="propertie-item__info">
+                <div class="info--name">${item.name}</div>
+                <div class="info--address">
+                ${item.address}
+                </div>
               </div>
-            </div>
-            <div class="propertie-item__info">
-              <div class="info--name">Toà nhà Bitexco</div>
-              <div class="info--address">
-                2 Hải Triều, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh,
-                Việt Nam
+            </div>`
+            )
+            .join("")}
+        </div>
+        `;
+            $("#data-container").html(dataHtml);
+          },
+        });
+      } else {
+        let container = $("#pagination");
+        container.pagination({
+          dataSource: function (done) {
+            $.ajax({
+              type: "GET",
+              url: "/propertiesData.json",
+              success: function (response) {
+                done(
+                  response.filter((propertie) => propertie.type === thisType)
+                );
+              },
+            });
+          },
+          showPrevious: false,
+          showNext: false,
+          pageSize: getPageSize(),
+          callback: function (data, pagination) {
+            const dataHtml = `<div class="propertie-wrapper">
+          ${data
+            .map(
+              (item) =>
+                `<div class='propertie-item ${item.type}'>
+              <div class="propertie-item__card">
+                <div class="propertie-icon">
+                  <img src="./images/${item.type}.png" />
+                </div>
+                <div class="propertie-image">
+                  <img src=${item.image} />
+                </div>
               </div>
-            </div>
-          </div>`
-          )
-          .join("")}
-      </div>
-      `
-      );
+              <div class="propertie-item__info">
+                <div class="info--name">${item.name}</div>
+                <div class="info--address">
+                ${item.address}
+                </div>
+              </div>
+            </div>`
+            )
+            .join("")}
+        </div>
+        `;
+            $("#data-container").html(dataHtml);
+          },
+        });
+      }
     });
+  });
+});
+
+// pagination function
+$(function () {
+  let container = $("#pagination");
+  container.pagination({
+    dataSource: function (done) {
+      $.ajax({
+        type: "GET",
+        url: "/propertiesData.json",
+        success: function (response) {
+          done(response);
+        },
+      });
+    },
+    showPrevious: false,
+    showNext: false,
+    pageSize: getPageSize(),
+    callback: function (data, pagination) {
+      const dataHtml = `<div class="propertie-wrapper">
+    ${data
+      .map(
+        (item) =>
+          `<div class='propertie-item ${item.type}'>
+        <div class="propertie-item__card">
+          <div class="propertie-icon">
+            <img src="./images/${item.type}.png" />
+          </div>
+          <div class="propertie-image">
+            <img src=${item.image} />
+          </div>
+        </div>
+        <div class="propertie-item__info">
+          <div class="info--name">${item.name}</div>
+          <div class="info--address">
+          ${item.address}
+          </div>
+        </div>
+      </div>`
+      )
+      .join("")}
+  </div>
+  `;
+      $("#data-container").html(dataHtml);
+    },
   });
 });
