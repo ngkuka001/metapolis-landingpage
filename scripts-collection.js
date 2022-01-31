@@ -39,7 +39,7 @@ window.addEventListener("load", function () {
           dataSource: function (done) {
             $.ajax({
               type: "GET",
-              url: `${window.location.href}/propertiesData.json`,
+              url: './propertiesData.json',
               success: function (response) {
                 done(response);
               },
@@ -82,7 +82,7 @@ window.addEventListener("load", function () {
           dataSource: function (done) {
             $.ajax({
               type: "GET",
-              url: `${window.location.href}/propertiesData.json`,
+              url: './propertiesData.json',
               success: function (response) {
                 done(
                   response.filter((propertie) => propertie.type === thisType)
@@ -133,7 +133,7 @@ $(function () {
     dataSource: function (done) {
       $.ajax({
         type: "GET",
-        url: `${window.location.href}/propertiesData.json`,
+        url: './propertiesData.json',
         success: function (response) {
           done(response);
         },
